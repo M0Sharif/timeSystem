@@ -1,0 +1,22 @@
+{
+  "name": "timesystem",
+  "version": "1.0.0",
+  "description": "a system to monitor the timesheet of contractors, approvers to approve the timesheet and invoice admins check timesheets have been approved correcty and timesheet detais are correct",
+  "main": "server.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M0Sharif/timeSystem.git"
+  },
+  "author": "mohamed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/M0Sharif/timeSystem/issues"
+  },
+  "homepage": "https://github.com/M0Sharif/timeSystem#readme"
+}
