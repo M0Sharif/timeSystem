@@ -9,7 +9,8 @@ var Register = React.createClass({
     return {
       email: "",
       password: "",
-      passwordConfirmation: ""
+      passwordConfirmation: "",
+      type: ""
     }
   },
   handleChange: function(e){

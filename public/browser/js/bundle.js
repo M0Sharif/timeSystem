@@ -57,7 +57,7 @@
 	var Login = __webpack_require__(262);
 	var Register = __webpack_require__(227);
 	var Main = __webpack_require__(261);
-	// var Dashboard = require("./components/body/dashboard.jsx");
+	var Timesheet = __webpack_require__(263);
 	// var Profile = require("./components/body/profile.jsx");
 	// var Edit = require("./components/body/edit.jsx");
 	// var Create = require("./components/body/create.jsx");
@@ -82,7 +82,11 @@
 	      { history: browserHistory },
 	      React.createElement(Route, { path: '/login', component: Login }),
 	      React.createElement(Route, { path: '/register', component: Register }),
-	      React.createElement(Route, { path: '/', component: Main, onEnter: authentication })
+	      React.createElement(
+	        Route,
+	        { path: '/', component: Main, onEnter: authentication },
+	        React.createElement(IndexRoute, { component: Timesheet })
+	      )
 	    );
 	  }
 	  // <IndexRoute component={Dashboard}/>
@@ -26393,7 +26397,8 @@
 	    return {
 	      email: "",
 	      password: "",
-	      passwordConfirmation: ""
+	      passwordConfirmation: "",
+	      type: ""
 	    };
 	  },
 	  handleChange: function handleChange(e) {
@@ -29010,6 +29015,34 @@
 	});
 
 	module.exports = Login;
+
+/***/ },
+/* 263 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+	// var Header = require("./header.jsx");
+	// var Footer = require("./footer.jsx");
+
+	var Timesheet = React.createClass({
+		displayName: "Timesheet",
+
+		render: function render() {
+			return React.createElement(
+				"div",
+				null,
+				React.createElement(
+					"h1",
+					null,
+					"Contractor Timesheet page!"
+				)
+			);
+		}
+	});
+
+	module.exports = Timesheet;
 
 /***/ }
 /******/ ]);

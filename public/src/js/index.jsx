@@ -9,7 +9,7 @@ var browserHistory = ReactRouter.browserHistory;
 var Login = require("./components/login.jsx");
 var Register = require("./components/register.jsx");
 var Main = require("./components/main.jsx");  
-// var Dashboard = require("./components/body/dashboard.jsx");
+var Timesheet = require("./components/timesheet.jsx");
 // var Profile = require("./components/body/profile.jsx");
 // var Edit = require("./components/body/edit.jsx");
 // var Create = require("./components/body/create.jsx");
@@ -33,7 +33,8 @@ var App = React.createClass({
         <Route path="/register" component={Register}/>
 
   		  <Route path="/" component={Main} onEnter={authentication}>
-  			 
+  			   <IndexRoute component={Timesheet}/>
+           
   		  </Route>
 	     </Router>
     )
