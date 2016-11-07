@@ -54,9 +54,9 @@
 	var Router = ReactRouter.Router;
 	var browserHistory = ReactRouter.browserHistory;
 
-	var Login = __webpack_require__(262);
-	var Register = __webpack_require__(227);
-	var Main = __webpack_require__(261);
+	var Login = __webpack_require__(227);
+	var Register = __webpack_require__(261);
+	var Main = __webpack_require__(262);
 	var Timesheet = __webpack_require__(263);
 	// var Profile = require("./components/body/profile.jsx");
 	// var Edit = require("./components/body/edit.jsx");
@@ -26385,30 +26385,37 @@
 	"use strict";
 
 	var React = __webpack_require__(1);
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var MainDispatcher = __webpack_require__(257);
-	var MainConstant = __webpack_require__(260);
-	var UserStore = __webpack_require__(228);
 
-	var Register = React.createClass({
-	  displayName: "Register",
+	var MainDispatcher = __webpack_require__(228);
+	var MainConstant = __webpack_require__(231);
+	var UserStore = __webpack_require__(232);
 
+	var Login = React.createClass({
+	  displayName: "Login",
+
+	  componentDidMount: function componentDidMount() {
+	    UserStore.on(MainConstant.USER.ERROR.LOGIN, this.handleError);
+	  },
 	  getInitialState: function getInitialState() {
 	    return {
 	      email: "",
 	      password: "",
-	      passwordConfirmation: "",
-	      type: ""
+	      error: false
 	    };
 	  },
 	  handleChange: function handleChange(e) {
-	    this.setState(e.target.name === "email" ? { email: e.target.value } : e.target.name === "password" ? { password: e.target.value } : { passwordConfirmation: e.target.value });
+	    this.setState(e.target.name === "email" ? { email: e.target.value } : { password: e.target.value });
 	  },
 	  handleSubmit: function handleSubmit(e) {
 	    e.preventDefault();
 	    MainDispatcher.dispatch({
-	      action: MainConstant.USER.REGISTER,
-	      user: this.state
+	      action: MainConstant.USER.LOGIN,
+	      user: { email: this.state.email, password: this.state.password }
+	    });
+	  },
+	  handleError: function handleError() {
+	    this.setState({
+	      error: UserStore.getError().message
 	    });
 	  },
 	  render: function render() {
@@ -26432,7 +26439,7 @@
 	                null,
 	                React.createElement(
 	                  "span",
-	                  null,
+	                  { prefix: true },
 	                  React.createElement("i", null)
 	                )
 	              ),
@@ -26450,7 +26457,7 @@
 	                null,
 	                React.createElement(
 	                  "span",
-	                  null,
+	                  { prefix: true },
 	                  React.createElement("i", null)
 	                )
 	              ),
@@ -26458,24 +26465,6 @@
 	                "div",
 	                null,
 	                React.createElement("input", { type: "password", placeholder: "password", name: "password", onChange: this.handleChange })
-	              )
-	            ),
-	            React.createElement(
-	              "div",
-	              null,
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement(
-	                  "span",
-	                  null,
-	                  React.createElement("i", null)
-	                )
-	              ),
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement("input", { type: "password", placeholder: "confirm password", name: "passwordConfirmation", onChange: this.handleChange })
 	              ),
 	              React.createElement(
 	                "div",
@@ -26483,41 +26472,351 @@
 	                React.createElement(
 	                  "button",
 	                  { type: "submit" },
-	                  "Register"
+	                  "Login"
 	                ),
 	                React.createElement(
 	                  "p",
 	                  null,
-	                  "Already a member? ",
+	                  "Don't have an account? ",
 	                  React.createElement(
 	                    "a",
-	                    { href: "/login" },
-	                    "Login here"
+	                    { href: "/register" },
+	                    "Rigister here"
 	                  )
 	                )
 	              )
 	            )
-	          )
+	          ),
+	          this.state.error ? React.createElement(
+	            "div",
+	            null,
+	            this.state.error
+	          ) : ""
 	        )
 	      )
 	    );
 	  }
 	});
 
-	module.exports = Register;
+	module.exports = Login;
 
 /***/ },
 /* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	var Dispatcher = __webpack_require__(229).Dispatcher;
+
+	var appDispatcher = new Dispatcher();
+
+	module.exports = appDispatcher;
+
+/***/ },
+/* 229 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 */
+
+	module.exports.Dispatcher = __webpack_require__(230);
+
+
+/***/ },
+/* 230 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule Dispatcher
+	 * 
+	 * @preventMunge
+	 */
+
+	'use strict';
+
+	exports.__esModule = true;
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var invariant = __webpack_require__(8);
+
+	var _prefix = 'ID_';
+
+	/**
+	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
+	 * different from generic pub-sub systems in two ways:
+	 *
+	 *   1) Callbacks are not subscribed to particular events. Every payload is
+	 *      dispatched to every registered callback.
+	 *   2) Callbacks can be deferred in whole or part until other callbacks have
+	 *      been executed.
+	 *
+	 * For example, consider this hypothetical flight destination form, which
+	 * selects a default city when a country is selected:
+	 *
+	 *   var flightDispatcher = new Dispatcher();
+	 *
+	 *   // Keeps track of which country is selected
+	 *   var CountryStore = {country: null};
+	 *
+	 *   // Keeps track of which city is selected
+	 *   var CityStore = {city: null};
+	 *
+	 *   // Keeps track of the base flight price of the selected city
+	 *   var FlightPriceStore = {price: null}
+	 *
+	 * When a user changes the selected city, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'city-update',
+	 *     selectedCity: 'paris'
+	 *   });
+	 *
+	 * This payload is digested by `CityStore`:
+	 *
+	 *   flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'city-update') {
+	 *       CityStore.city = payload.selectedCity;
+	 *     }
+	 *   });
+	 *
+	 * When the user selects a country, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'country-update',
+	 *     selectedCountry: 'australia'
+	 *   });
+	 *
+	 * This payload is digested by both stores:
+	 *
+	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       CountryStore.country = payload.selectedCountry;
+	 *     }
+	 *   });
+	 *
+	 * When the callback to update `CountryStore` is registered, we save a reference
+	 * to the returned token. Using this token with `waitFor()`, we can guarantee
+	 * that `CountryStore` is updated before the callback that updates `CityStore`
+	 * needs to query its data.
+	 *
+	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       // `CountryStore.country` may not be updated.
+	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+	 *       // `CountryStore.country` is now guaranteed to be updated.
+	 *
+	 *       // Select the default city for the new country
+	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+	 *     }
+	 *   });
+	 *
+	 * The usage of `waitFor()` can be chained, for example:
+	 *
+	 *   FlightPriceStore.dispatchToken =
+	 *     flightDispatcher.register(function(payload) {
+	 *       switch (payload.actionType) {
+	 *         case 'country-update':
+	 *         case 'city-update':
+	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+	 *           FlightPriceStore.price =
+	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
+	 *           break;
+	 *     }
+	 *   });
+	 *
+	 * The `country-update` payload will be guaranteed to invoke the stores'
+	 * registered callbacks in order: `CountryStore`, `CityStore`, then
+	 * `FlightPriceStore`.
+	 */
+
+	var Dispatcher = (function () {
+	  function Dispatcher() {
+	    _classCallCheck(this, Dispatcher);
+
+	    this._callbacks = {};
+	    this._isDispatching = false;
+	    this._isHandled = {};
+	    this._isPending = {};
+	    this._lastID = 1;
+	  }
+
+	  /**
+	   * Registers a callback to be invoked with every dispatched payload. Returns
+	   * a token that can be used with `waitFor()`.
+	   */
+
+	  Dispatcher.prototype.register = function register(callback) {
+	    var id = _prefix + this._lastID++;
+	    this._callbacks[id] = callback;
+	    return id;
+	  };
+
+	  /**
+	   * Removes a callback based on its token.
+	   */
+
+	  Dispatcher.prototype.unregister = function unregister(id) {
+	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	    delete this._callbacks[id];
+	  };
+
+	  /**
+	   * Waits for the callbacks specified to be invoked before continuing execution
+	   * of the current callback. This method should only be used by a callback in
+	   * response to a dispatched payload.
+	   */
+
+	  Dispatcher.prototype.waitFor = function waitFor(ids) {
+	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+	    for (var ii = 0; ii < ids.length; ii++) {
+	      var id = ids[ii];
+	      if (this._isPending[id]) {
+	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+	        continue;
+	      }
+	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	      this._invokeCallback(id);
+	    }
+	  };
+
+	  /**
+	   * Dispatches a payload to all registered callbacks.
+	   */
+
+	  Dispatcher.prototype.dispatch = function dispatch(payload) {
+	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+	    this._startDispatching(payload);
+	    try {
+	      for (var id in this._callbacks) {
+	        if (this._isPending[id]) {
+	          continue;
+	        }
+	        this._invokeCallback(id);
+	      }
+	    } finally {
+	      this._stopDispatching();
+	    }
+	  };
+
+	  /**
+	   * Is this Dispatcher currently dispatching.
+	   */
+
+	  Dispatcher.prototype.isDispatching = function isDispatching() {
+	    return this._isDispatching;
+	  };
+
+	  /**
+	   * Call the callback stored with the given id. Also do some internal
+	   * bookkeeping.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+	    this._isPending[id] = true;
+	    this._callbacks[id](this._pendingPayload);
+	    this._isHandled[id] = true;
+	  };
+
+	  /**
+	   * Set up bookkeeping needed when dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+	    for (var id in this._callbacks) {
+	      this._isPending[id] = false;
+	      this._isHandled[id] = false;
+	    }
+	    this._pendingPayload = payload;
+	    this._isDispatching = true;
+	  };
+
+	  /**
+	   * Clear bookkeeping used for dispatching.
+	   *
+	   * @internal
+	   */
+
+	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+	    delete this._pendingPayload;
+	    this._isDispatching = false;
+	  };
+
+	  return Dispatcher;
+	})();
+
+	module.exports = Dispatcher;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ },
+/* 231 */
+/***/ function(module, exports) {
+
 	"use strict";
 
-	var merge = __webpack_require__(229);
-	var axios = __webpack_require__(231);
-	var EventEmitter = __webpack_require__(256).EventEmitter;
+	module.exports = {
+	  USER: {
+	    LOGIN: "USER LOGIN",
+	    REGISTER: "USER REGISTER",
+	    LOGOUT: "USER LOGOUT",
+	    UPDATE: {
+	      LOGIN: "USER UPDATE LOGIN",
+	      REGISTER: "USER UPDATE REGISTER",
+	      LOGOUT: "USER UPDATE LOGOUT",
+	      DELETE: "USER UPDATE DELETE"
+	    },
+	    ERROR: {
+	      LOGIN: "USER ERROR LOGIN",
+	      REGISTER: "USER ERROR REGISTER",
+	      LOGOUT: "USER ERROR LOGOUT"
+	    },
+	    DELETE: "USER DELETE"
+	  },
+	  DASHBOARD: {
+	    CLIENT: "DASHBOARD CLIENT",
+	    SPARTAN: "DASHBOARD SPARTANS",
+	    ADMIN: "DASHBOARD ADMIN",
+	    UPDATE: "DASHBOARD UPDATE",
+	    TYPE: {
+	      SPARTAN: "spartan",
+	      CLIENT: "client",
+	      ADMIN: "admin"
+	    },
+	    SEARCH: {
+	      NAME: "DASHBOARD SEARCH NAME"
+	    }
+	  }
+	};
+
+/***/ },
+/* 232 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var merge = __webpack_require__(233);
+	var axios = __webpack_require__(235);
+	var EventEmitter = __webpack_require__(260).EventEmitter;
 	var browserHistory = __webpack_require__(172).browserHistory;
-	var MainDispatcher = __webpack_require__(257);
-	var MainConstant = __webpack_require__(260);
+	var MainDispatcher = __webpack_require__(228);
+	var MainConstant = __webpack_require__(231);
 
 	//variables to store
 	var _user = JSON.parse(localStorage.getItem("user"));
@@ -26576,7 +26875,7 @@
 	}
 
 /***/ },
-/* 229 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/*!
@@ -26754,10 +27053,10 @@
 		}
 
 	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(230)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(234)(module)))
 
 /***/ },
-/* 230 */
+/* 234 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -26773,20 +27072,20 @@
 
 
 /***/ },
-/* 231 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(232);
+	module.exports = __webpack_require__(236);
 
 /***/ },
-/* 232 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
-	var bind = __webpack_require__(234);
-	var Axios = __webpack_require__(235);
+	var utils = __webpack_require__(237);
+	var bind = __webpack_require__(238);
+	var Axios = __webpack_require__(239);
 
 	/**
 	 * Create an instance of Axios
@@ -26819,15 +27118,15 @@
 	};
 
 	// Expose Cancel & CancelToken
-	axios.Cancel = __webpack_require__(253);
-	axios.CancelToken = __webpack_require__(254);
-	axios.isCancel = __webpack_require__(250);
+	axios.Cancel = __webpack_require__(257);
+	axios.CancelToken = __webpack_require__(258);
+	axios.isCancel = __webpack_require__(254);
 
 	// Expose all/spread
 	axios.all = function all(promises) {
 	  return Promise.all(promises);
 	};
-	axios.spread = __webpack_require__(255);
+	axios.spread = __webpack_require__(259);
 
 	module.exports = axios;
 
@@ -26836,12 +27135,12 @@
 
 
 /***/ },
-/* 233 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var bind = __webpack_require__(234);
+	var bind = __webpack_require__(238);
 
 	/*global toString:true*/
 
@@ -27141,7 +27440,7 @@
 
 
 /***/ },
-/* 234 */
+/* 238 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -27158,17 +27457,17 @@
 
 
 /***/ },
-/* 235 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var defaults = __webpack_require__(236);
-	var utils = __webpack_require__(233);
-	var InterceptorManager = __webpack_require__(247);
-	var dispatchRequest = __webpack_require__(248);
-	var isAbsoluteURL = __webpack_require__(251);
-	var combineURLs = __webpack_require__(252);
+	var defaults = __webpack_require__(240);
+	var utils = __webpack_require__(237);
+	var InterceptorManager = __webpack_require__(251);
+	var dispatchRequest = __webpack_require__(252);
+	var isAbsoluteURL = __webpack_require__(255);
+	var combineURLs = __webpack_require__(256);
 
 	/**
 	 * Create a new instance of Axios
@@ -27249,13 +27548,13 @@
 
 
 /***/ },
-/* 236 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var utils = __webpack_require__(233);
-	var normalizeHeaderName = __webpack_require__(237);
+	var utils = __webpack_require__(237);
+	var normalizeHeaderName = __webpack_require__(241);
 
 	var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 	var DEFAULT_CONTENT_TYPE = {
@@ -27272,10 +27571,10 @@
 	  var adapter;
 	  if (typeof XMLHttpRequest !== 'undefined') {
 	    // For browsers use XHR adapter
-	    adapter = __webpack_require__(238);
+	    adapter = __webpack_require__(242);
 	  } else if (typeof process !== 'undefined') {
 	    // For node use HTTP adapter
-	    adapter = __webpack_require__(238);
+	    adapter = __webpack_require__(242);
 	  }
 	  return adapter;
 	}
@@ -27342,12 +27641,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 237 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	module.exports = function normalizeHeaderName(headers, normalizedName) {
 	  utils.forEach(headers, function processHeader(value, name) {
@@ -27360,18 +27659,18 @@
 
 
 /***/ },
-/* 238 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var utils = __webpack_require__(233);
-	var settle = __webpack_require__(239);
-	var buildURL = __webpack_require__(242);
-	var parseHeaders = __webpack_require__(243);
-	var isURLSameOrigin = __webpack_require__(244);
-	var createError = __webpack_require__(240);
-	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(245);
+	var utils = __webpack_require__(237);
+	var settle = __webpack_require__(243);
+	var buildURL = __webpack_require__(246);
+	var parseHeaders = __webpack_require__(247);
+	var isURLSameOrigin = __webpack_require__(248);
+	var createError = __webpack_require__(244);
+	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(249);
 
 	module.exports = function xhrAdapter(config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -27467,7 +27766,7 @@
 	    // This is only done if running in a standard browser environment.
 	    // Specifically not if we're in a web worker, or react-native.
 	    if (utils.isStandardBrowserEnv()) {
-	      var cookies = __webpack_require__(246);
+	      var cookies = __webpack_require__(250);
 
 	      // Add xsrf header
 	      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -27544,12 +27843,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 239 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var createError = __webpack_require__(240);
+	var createError = __webpack_require__(244);
 
 	/**
 	 * Resolve or reject a Promise based on response status.
@@ -27575,12 +27874,12 @@
 
 
 /***/ },
-/* 240 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var enhanceError = __webpack_require__(241);
+	var enhanceError = __webpack_require__(245);
 
 	/**
 	 * Create an Error with the specified message, config, error code, and response.
@@ -27598,7 +27897,7 @@
 
 
 /***/ },
-/* 241 */
+/* 245 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -27623,12 +27922,12 @@
 
 
 /***/ },
-/* 242 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	function encode(val) {
 	  return encodeURIComponent(val).
@@ -27697,12 +27996,12 @@
 
 
 /***/ },
-/* 243 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	/**
 	 * Parse headers into an object
@@ -27740,12 +28039,12 @@
 
 
 /***/ },
-/* 244 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -27814,7 +28113,7 @@
 
 
 /***/ },
-/* 245 */
+/* 249 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -27856,12 +28155,12 @@
 
 
 /***/ },
-/* 246 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -27915,12 +28214,12 @@
 
 
 /***/ },
-/* 247 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	function InterceptorManager() {
 	  this.handlers = [];
@@ -27973,15 +28272,15 @@
 
 
 /***/ },
-/* 248 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
-	var transformData = __webpack_require__(249);
-	var isCancel = __webpack_require__(250);
-	var defaults = __webpack_require__(236);
+	var utils = __webpack_require__(237);
+	var transformData = __webpack_require__(253);
+	var isCancel = __webpack_require__(254);
+	var defaults = __webpack_require__(240);
 
 	/**
 	 * Throws a `Cancel` if cancellation has been requested.
@@ -28058,12 +28357,12 @@
 
 
 /***/ },
-/* 249 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(233);
+	var utils = __webpack_require__(237);
 
 	/**
 	 * Transform the data for a request or a response
@@ -28084,7 +28383,7 @@
 
 
 /***/ },
-/* 250 */
+/* 254 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28095,7 +28394,7 @@
 
 
 /***/ },
-/* 251 */
+/* 255 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28115,7 +28414,7 @@
 
 
 /***/ },
-/* 252 */
+/* 256 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28133,7 +28432,7 @@
 
 
 /***/ },
-/* 253 */
+/* 257 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28158,12 +28457,12 @@
 
 
 /***/ },
-/* 254 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Cancel = __webpack_require__(253);
+	var Cancel = __webpack_require__(257);
 
 	/**
 	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -28221,7 +28520,7 @@
 
 
 /***/ },
-/* 255 */
+/* 259 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28254,7 +28553,7 @@
 
 
 /***/ },
-/* 256 */
+/* 260 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -28562,312 +28861,135 @@
 
 
 /***/ },
-/* 257 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Dispatcher = __webpack_require__(258).Dispatcher;
-
-	var appDispatcher = new Dispatcher();
-
-	module.exports = appDispatcher;
-
-/***/ },
-/* 258 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright (c) 2014-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 */
-
-	module.exports.Dispatcher = __webpack_require__(259);
-
-
-/***/ },
-/* 259 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright (c) 2014-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule Dispatcher
-	 * 
-	 * @preventMunge
-	 */
-
-	'use strict';
-
-	exports.__esModule = true;
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-	var invariant = __webpack_require__(8);
-
-	var _prefix = 'ID_';
-
-	/**
-	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
-	 * different from generic pub-sub systems in two ways:
-	 *
-	 *   1) Callbacks are not subscribed to particular events. Every payload is
-	 *      dispatched to every registered callback.
-	 *   2) Callbacks can be deferred in whole or part until other callbacks have
-	 *      been executed.
-	 *
-	 * For example, consider this hypothetical flight destination form, which
-	 * selects a default city when a country is selected:
-	 *
-	 *   var flightDispatcher = new Dispatcher();
-	 *
-	 *   // Keeps track of which country is selected
-	 *   var CountryStore = {country: null};
-	 *
-	 *   // Keeps track of which city is selected
-	 *   var CityStore = {city: null};
-	 *
-	 *   // Keeps track of the base flight price of the selected city
-	 *   var FlightPriceStore = {price: null}
-	 *
-	 * When a user changes the selected city, we dispatch the payload:
-	 *
-	 *   flightDispatcher.dispatch({
-	 *     actionType: 'city-update',
-	 *     selectedCity: 'paris'
-	 *   });
-	 *
-	 * This payload is digested by `CityStore`:
-	 *
-	 *   flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'city-update') {
-	 *       CityStore.city = payload.selectedCity;
-	 *     }
-	 *   });
-	 *
-	 * When the user selects a country, we dispatch the payload:
-	 *
-	 *   flightDispatcher.dispatch({
-	 *     actionType: 'country-update',
-	 *     selectedCountry: 'australia'
-	 *   });
-	 *
-	 * This payload is digested by both stores:
-	 *
-	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'country-update') {
-	 *       CountryStore.country = payload.selectedCountry;
-	 *     }
-	 *   });
-	 *
-	 * When the callback to update `CountryStore` is registered, we save a reference
-	 * to the returned token. Using this token with `waitFor()`, we can guarantee
-	 * that `CountryStore` is updated before the callback that updates `CityStore`
-	 * needs to query its data.
-	 *
-	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'country-update') {
-	 *       // `CountryStore.country` may not be updated.
-	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
-	 *       // `CountryStore.country` is now guaranteed to be updated.
-	 *
-	 *       // Select the default city for the new country
-	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
-	 *     }
-	 *   });
-	 *
-	 * The usage of `waitFor()` can be chained, for example:
-	 *
-	 *   FlightPriceStore.dispatchToken =
-	 *     flightDispatcher.register(function(payload) {
-	 *       switch (payload.actionType) {
-	 *         case 'country-update':
-	 *         case 'city-update':
-	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
-	 *           FlightPriceStore.price =
-	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
-	 *           break;
-	 *     }
-	 *   });
-	 *
-	 * The `country-update` payload will be guaranteed to invoke the stores'
-	 * registered callbacks in order: `CountryStore`, `CityStore`, then
-	 * `FlightPriceStore`.
-	 */
-
-	var Dispatcher = (function () {
-	  function Dispatcher() {
-	    _classCallCheck(this, Dispatcher);
-
-	    this._callbacks = {};
-	    this._isDispatching = false;
-	    this._isHandled = {};
-	    this._isPending = {};
-	    this._lastID = 1;
-	  }
-
-	  /**
-	   * Registers a callback to be invoked with every dispatched payload. Returns
-	   * a token that can be used with `waitFor()`.
-	   */
-
-	  Dispatcher.prototype.register = function register(callback) {
-	    var id = _prefix + this._lastID++;
-	    this._callbacks[id] = callback;
-	    return id;
-	  };
-
-	  /**
-	   * Removes a callback based on its token.
-	   */
-
-	  Dispatcher.prototype.unregister = function unregister(id) {
-	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-	    delete this._callbacks[id];
-	  };
-
-	  /**
-	   * Waits for the callbacks specified to be invoked before continuing execution
-	   * of the current callback. This method should only be used by a callback in
-	   * response to a dispatched payload.
-	   */
-
-	  Dispatcher.prototype.waitFor = function waitFor(ids) {
-	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
-	    for (var ii = 0; ii < ids.length; ii++) {
-	      var id = ids[ii];
-	      if (this._isPending[id]) {
-	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
-	        continue;
-	      }
-	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-	      this._invokeCallback(id);
-	    }
-	  };
-
-	  /**
-	   * Dispatches a payload to all registered callbacks.
-	   */
-
-	  Dispatcher.prototype.dispatch = function dispatch(payload) {
-	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
-	    this._startDispatching(payload);
-	    try {
-	      for (var id in this._callbacks) {
-	        if (this._isPending[id]) {
-	          continue;
-	        }
-	        this._invokeCallback(id);
-	      }
-	    } finally {
-	      this._stopDispatching();
-	    }
-	  };
-
-	  /**
-	   * Is this Dispatcher currently dispatching.
-	   */
-
-	  Dispatcher.prototype.isDispatching = function isDispatching() {
-	    return this._isDispatching;
-	  };
-
-	  /**
-	   * Call the callback stored with the given id. Also do some internal
-	   * bookkeeping.
-	   *
-	   * @internal
-	   */
-
-	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
-	    this._isPending[id] = true;
-	    this._callbacks[id](this._pendingPayload);
-	    this._isHandled[id] = true;
-	  };
-
-	  /**
-	   * Set up bookkeeping needed when dispatching.
-	   *
-	   * @internal
-	   */
-
-	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
-	    for (var id in this._callbacks) {
-	      this._isPending[id] = false;
-	      this._isHandled[id] = false;
-	    }
-	    this._pendingPayload = payload;
-	    this._isDispatching = true;
-	  };
-
-	  /**
-	   * Clear bookkeeping used for dispatching.
-	   *
-	   * @internal
-	   */
-
-	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
-	    delete this._pendingPayload;
-	    this._isDispatching = false;
-	  };
-
-	  return Dispatcher;
-	})();
-
-	module.exports = Dispatcher;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
-
-/***/ },
-/* 260 */
-/***/ function(module, exports) {
 
 	"use strict";
 
-	module.exports = {
-	  USER: {
-	    LOGIN: "USER LOGIN",
-	    REGISTER: "USER REGISTER",
-	    LOGOUT: "USER LOGOUT",
-	    UPDATE: {
-	      LOGIN: "USER UPDATE LOGIN",
-	      REGISTER: "USER UPDATE REGISTER",
-	      LOGOUT: "USER UPDATE LOGOUT",
-	      DELETE: "USER UPDATE DELETE"
-	    },
-	    ERROR: {
-	      LOGIN: "USER ERROR LOGIN",
-	      REGISTER: "USER ERROR REGISTER",
-	      LOGOUT: "USER ERROR LOGOUT"
-	    },
-	    DELETE: "USER DELETE"
+	var React = __webpack_require__(1);
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var MainDispatcher = __webpack_require__(228);
+	var MainConstant = __webpack_require__(231);
+	var UserStore = __webpack_require__(232);
+
+	var Register = React.createClass({
+	  displayName: "Register",
+
+	  getInitialState: function getInitialState() {
+	    return {
+	      email: "",
+	      password: "",
+	      passwordConfirmation: "",
+	      type: ""
+	    };
 	  },
-	  DASHBOARD: {
-	    CLIENT: "DASHBOARD CLIENT",
-	    SPARTAN: "DASHBOARD SPARTANS",
-	    ADMIN: "DASHBOARD ADMIN",
-	    UPDATE: "DASHBOARD UPDATE",
-	    TYPE: {
-	      SPARTAN: "spartan",
-	      CLIENT: "client",
-	      ADMIN: "admin"
-	    },
-	    SEARCH: {
-	      NAME: "DASHBOARD SEARCH NAME"
-	    }
+	  handleChange: function handleChange(e) {
+	    this.setState(e.target.name === "email" ? { email: e.target.value } : e.target.name === "password" ? { password: e.target.value } : { passwordConfirmation: e.target.value });
+	  },
+	  handleSubmit: function handleSubmit(e) {
+	    e.preventDefault();
+	    MainDispatcher.dispatch({
+	      action: MainConstant.USER.REGISTER,
+	      user: this.state
+	    });
+	  },
+	  render: function render() {
+	    return React.createElement(
+	      "div",
+	      null,
+	      React.createElement(
+	        "div",
+	        null,
+	        React.createElement(
+	          "div",
+	          null,
+	          React.createElement(
+	            "form",
+	            { onSubmit: this.handleSubmit },
+	            React.createElement(
+	              "div",
+	              null,
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "span",
+	                  null,
+	                  React.createElement("i", null)
+	                )
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement("input", { type: "text", placeholder: "email", name: "email", onChange: this.handleChange })
+	              )
+	            ),
+	            React.createElement(
+	              "div",
+	              null,
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "span",
+	                  null,
+	                  React.createElement("i", null)
+	                )
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement("input", { type: "password", placeholder: "password", name: "password", onChange: this.handleChange })
+	              )
+	            ),
+	            React.createElement(
+	              "div",
+	              null,
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "span",
+	                  null,
+	                  React.createElement("i", null)
+	                )
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement("input", { type: "password", placeholder: "confirm password", name: "passwordConfirmation", onChange: this.handleChange })
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "button",
+	                  { type: "submit" },
+	                  "Register"
+	                ),
+	                React.createElement(
+	                  "p",
+	                  null,
+	                  "Already a member? ",
+	                  React.createElement(
+	                    "a",
+	                    { href: "/login" },
+	                    "Login here"
+	                  )
+	                )
+	              )
+	            )
+	          )
+	        )
+	      )
+	    );
 	  }
-	};
+	});
+
+	module.exports = Register;
 
 /***/ },
-/* 261 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -28893,128 +29015,6 @@
 	});
 
 	module.exports = Main;
-
-/***/ },
-/* 262 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	var React = __webpack_require__(1);
-
-	var MainDispatcher = __webpack_require__(257);
-	var MainConstant = __webpack_require__(260);
-	var UserStore = __webpack_require__(228);
-
-	var Login = React.createClass({
-	  displayName: "Login",
-
-	  componentDidMount: function componentDidMount() {
-	    UserStore.on(MainConstant.USER.ERROR.LOGIN, this.handleError);
-	  },
-	  getInitialState: function getInitialState() {
-	    return {
-	      email: "",
-	      password: "",
-	      error: false
-	    };
-	  },
-	  handleChange: function handleChange(e) {
-	    this.setState(e.target.name === "email" ? { email: e.target.value } : { password: e.target.value });
-	  },
-	  handleSubmit: function handleSubmit(e) {
-	    e.preventDefault();
-	    MainDispatcher.dispatch({
-	      action: MainConstant.USER.LOGIN,
-	      user: { email: this.state.email, password: this.state.password }
-	    });
-	  },
-	  handleError: function handleError() {
-	    this.setState({
-	      error: UserStore.getError().message
-	    });
-	  },
-	  render: function render() {
-	    return React.createElement(
-	      "div",
-	      null,
-	      React.createElement(
-	        "div",
-	        null,
-	        React.createElement(
-	          "div",
-	          null,
-	          React.createElement(
-	            "form",
-	            { onSubmit: this.handleSubmit },
-	            React.createElement(
-	              "div",
-	              null,
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement(
-	                  "span",
-	                  { prefix: true },
-	                  React.createElement("i", null)
-	                )
-	              ),
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement("input", { type: "text", placeholder: "email", name: "email", onChange: this.handleChange })
-	              )
-	            ),
-	            React.createElement(
-	              "div",
-	              null,
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement(
-	                  "span",
-	                  { prefix: true },
-	                  React.createElement("i", null)
-	                )
-	              ),
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement("input", { type: "password", placeholder: "password", name: "password", onChange: this.handleChange })
-	              ),
-	              React.createElement(
-	                "div",
-	                null,
-	                React.createElement(
-	                  "button",
-	                  { type: "submit" },
-	                  "Login"
-	                ),
-	                React.createElement(
-	                  "p",
-	                  null,
-	                  "Don't have an account? ",
-	                  React.createElement(
-	                    "a",
-	                    { href: "/register" },
-	                    "Rigister here"
-	                  )
-	                )
-	              )
-	            )
-	          ),
-	          this.state.error ? React.createElement(
-	            "div",
-	            null,
-	            this.state.error
-	          ) : ""
-	        )
-	      )
-	    );
-	  }
-	});
-
-	module.exports = Login;
 
 /***/ },
 /* 263 */
