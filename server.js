@@ -4,14 +4,14 @@ var express = require('express'),
     methodOverride = require('method-override'),
     expressJWT = require('express-jwt'),
     config = require('./config/variables.js'),
-    routes = require('./routes/main.js'),
+    routes = require('./router/main.js'),
     app = express();
 
 // ***** DATABASE ***** //
-mongoose.connect(config.db, function() {
-  console.log('\nremote database connection established at ' + config.db + '\n');
-  require('./seed.js')
-});
+// mongoose.connect(config.db, function() {
+//   console.log('\nremote database connection established at ' + config.db + '\n');
+//   require('./seed.js')
+// });
 
 // ***** MIDDLEWARE ***** //
 // Use the body-parser middleware to enable us to read the req.body

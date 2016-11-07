@@ -15,7 +15,7 @@ var config = {
       loaders : [
         {
           test : /\.jsx?/,
-          include : [JS_DIR, DROPDOWN_DIR],
+          include : [JS_DIR],
           loader : 'babel'
         },
         {

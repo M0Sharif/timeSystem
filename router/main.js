@@ -1,6 +1,6 @@
 var express = require('express'),
     router = express.Router(),
-    authenticationController = require('../controllers/authentication'),
+    authenticationController = require('./controllers/authentication');
     // contractor = require('../controllers/spartan'),
     // invoiceAdmin = require('../controllers/client');
 

@@ -1,5 +1,5 @@
-var User = require('../models/user'),
-    config = require('../config/variables'),
+var User = require('../../models/user'),
+    config = require('../../config/variables'),
     jwt = require('jsonwebtoken'),
     merge = require('merge');
 
