@@ -6,8 +6,7 @@ var userSchema = mongoose.Schema({
   firstName:    { type: String },
   lastName:     { type: String },
   email:        { type: String, required: true, unique: true },
-  type:         { type: String, enum: ['spartan', 'admin', 'client'], required: true },
-  passwordHash: { type: String },
+  passwordHash: { type: String }
   // profile:      {
   //   image: 		{ type: String },
   //   summary: 		{ type: String, default: "" },

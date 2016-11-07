@@ -6,9 +6,9 @@ var IndexRoute = ReactRouter.IndexRoute;
 var Router = ReactRouter.Router;
 var browserHistory = ReactRouter.browserHistory;
 
-// var Login = require("./components/body/login.jsx");
+var Login = require("./components/login.jsx");
 var Register = require("./components/register.jsx");
-// var Main = require("./components/main.jsx");  
+var Main = require("./components/main.jsx");  
 // var Dashboard = require("./components/body/dashboard.jsx");
 // var Profile = require("./components/body/profile.jsx");
 // var Edit = require("./components/body/edit.jsx");
@@ -33,21 +33,22 @@ var App = React.createClass({
         <Route path="/register" component={Register}/>
 
   		  <Route path="/" component={Main} onEnter={authentication}>
-  			 <IndexRoute component={Dashboard}/>
-
-         <Route path="profile">
-          <Route path=":id" component={Profile}/>
-          <Route path=":id/edit" component={Edit}/>
-         </Route>
-
-         <Route path="admin">
-          <Route path="create" component={Create}/>
-          <Route path="edit" component={Edit}/>
-         </Route>
+  			 
   		  </Route>
 	     </Router>
     )
   }
+        // <IndexRoute component={Dashboard}/>
+
+         // <Route path="profile">
+          // <Route path=":id" component={Profile}/>
+          // <Route path=":id/edit" component={Edit}/>
+         // </Route>
+
+         // <Route path="admin">
+          // <Route path="create" component={Create}/>
+          // <Route path="edit" component={Edit}/>
+         // </Route>
 });
 
 ReactDOM.render(<App />, document.getElementById('app'), function() {

@@ -8,10 +8,9 @@ var express = require('express'),
     app = express();
 
 // ***** DATABASE ***** //
-// mongoose.connect(config.db, function() {
-//   console.log('\nremote database connection established at ' + config.db + '\n');
-//   require('./seed.js')
-// });
+mongoose.connect(config.db, function() {
+  console.log('\nremote database connection established at ' + config.db + '\n');
+});
 
 // ***** MIDDLEWARE ***** //
 // Use the body-parser middleware to enable us to read the req.body

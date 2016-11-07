@@ -54,9 +54,9 @@
 	var Router = ReactRouter.Router;
 	var browserHistory = ReactRouter.browserHistory;
 
-	// var Login = require("./components/body/login.jsx");
+	var Login = __webpack_require__(262);
 	var Register = __webpack_require__(227);
-	// var Main = require("./components/main.jsx");  
+	var Main = __webpack_require__(261);
 	// var Dashboard = require("./components/body/dashboard.jsx");
 	// var Profile = require("./components/body/profile.jsx");
 	// var Edit = require("./components/body/edit.jsx");
@@ -82,25 +82,20 @@
 	      { history: browserHistory },
 	      React.createElement(Route, { path: '/login', component: Login }),
 	      React.createElement(Route, { path: '/register', component: Register }),
-	      React.createElement(
-	        Route,
-	        { path: '/', component: Main, onEnter: authentication },
-	        React.createElement(IndexRoute, { component: Dashboard }),
-	        React.createElement(
-	          Route,
-	          { path: 'profile' },
-	          React.createElement(Route, { path: ':id', component: Profile }),
-	          React.createElement(Route, { path: ':id/edit', component: Edit })
-	        ),
-	        React.createElement(
-	          Route,
-	          { path: 'admin' },
-	          React.createElement(Route, { path: 'create', component: Create }),
-	          React.createElement(Route, { path: 'edit', component: Edit })
-	        )
-	      )
+	      React.createElement(Route, { path: '/', component: Main, onEnter: authentication })
 	    );
 	  }
+	  // <IndexRoute component={Dashboard}/>
+
+	  // <Route path="profile">
+	  // <Route path=":id" component={Profile}/>
+	  // <Route path=":id/edit" component={Edit}/>
+	  // </Route>
+
+	  // <Route path="admin">
+	  // <Route path="create" component={Create}/>
+	  // <Route path="edit" component={Edit}/>
+	  // </Route>
 	});
 
 	ReactDOM.render(React.createElement(App, null), document.getElementById('app'), function () {
@@ -26387,8 +26382,8 @@
 
 	var React = __webpack_require__(1);
 	var browserHistory = __webpack_require__(172).browserHistory;
-	// var MainDispatcher = require("../dispatchers/mainDispatcher");
-	// var MainConstant = require("../constants/mainConstant");
+	var MainDispatcher = __webpack_require__(257);
+	var MainConstant = __webpack_require__(260);
 	var UserStore = __webpack_require__(228);
 
 	var Register = React.createClass({
@@ -26414,85 +26409,80 @@
 	  render: function render() {
 	    return React.createElement(
 	      "div",
-	      { className: "row" },
+	      null,
 	      React.createElement(
 	        "div",
-	        { className: "large-5 large-centered columns" },
+	        null,
 	        React.createElement(
 	          "div",
-	          { className: "signup-panel" },
+	          null,
 	          React.createElement(
 	            "form",
 	            { onSubmit: this.handleSubmit },
 	            React.createElement(
 	              "div",
-	              { className: "logo" },
-	              React.createElement("img", { src: "http://spartaglobal.com/wp-content/uploads/2014/09/promotion-to-sparta-consulting.png", alt: "logo" })
-	            ),
-	            React.createElement(
-	              "div",
-	              { className: "row collapse" },
+	              null,
 	              React.createElement(
 	                "div",
-	                { className: "small-2 columns" },
+	                null,
 	                React.createElement(
 	                  "span",
-	                  { className: "prefix" },
-	                  React.createElement("i", { className: "fi-mail" })
+	                  null,
+	                  React.createElement("i", null)
 	                )
 	              ),
 	              React.createElement(
 	                "div",
-	                { className: "small-10  columns" },
+	                null,
 	                React.createElement("input", { type: "text", placeholder: "email", name: "email", onChange: this.handleChange })
 	              )
 	            ),
 	            React.createElement(
 	              "div",
-	              { className: "row collapse" },
+	              null,
 	              React.createElement(
 	                "div",
-	                { className: "small-2 columns " },
+	                null,
 	                React.createElement(
 	                  "span",
-	                  { className: "prefix" },
-	                  React.createElement("i", { className: "fi-lock" })
+	                  null,
+	                  React.createElement("i", null)
 	                )
 	              ),
 	              React.createElement(
 	                "div",
-	                { className: "small-10 columns " },
+	                null,
 	                React.createElement("input", { type: "password", placeholder: "password", name: "password", onChange: this.handleChange })
 	              )
 	            ),
 	            React.createElement(
 	              "div",
-	              { className: "row collapse" },
+	              null,
 	              React.createElement(
 	                "div",
-	                { className: "small-2 columns " },
+	                null,
 	                React.createElement(
 	                  "span",
-	                  { className: "prefix" },
-	                  React.createElement("i", { className: "fi-lock" })
+	                  null,
+	                  React.createElement("i", null)
 	                )
 	              ),
 	              React.createElement(
 	                "div",
-	                { className: "small-10 columns " },
+	                null,
 	                React.createElement("input", { type: "password", placeholder: "confirm password", name: "passwordConfirmation", onChange: this.handleChange })
 	              ),
 	              React.createElement(
 	                "div",
-	                { className: "small-10 columns " },
+	                null,
 	                React.createElement(
 	                  "button",
-	                  { type: "submit", className: "expanded button" },
+	                  { type: "submit" },
 	                  "Register"
 	                ),
 	                React.createElement(
 	                  "p",
-	                  { className: "signup" },
+	                  null,
 	                  "Already a member? ",
 	                  React.createElement(
 	                    "a",
@@ -28870,6 +28860,156 @@
 	    }
 	  }
 	};
+
+/***/ },
+/* 261 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+	// var Header = require("./header.jsx");
+	// var Footer = require("./footer.jsx");
+
+	var Main = React.createClass({
+		displayName: "Main",
+
+		render: function render() {
+			return React.createElement(
+				"div",
+				null,
+				React.createElement(
+					"main",
+					null,
+					this.props.children
+				)
+			);
+		}
+	});
+
+	module.exports = Main;
+
+/***/ },
+/* 262 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var React = __webpack_require__(1);
+
+	var MainDispatcher = __webpack_require__(257);
+	var MainConstant = __webpack_require__(260);
+	var UserStore = __webpack_require__(228);
+
+	var Login = React.createClass({
+	  displayName: "Login",
+
+	  componentDidMount: function componentDidMount() {
+	    UserStore.on(MainConstant.USER.ERROR.LOGIN, this.handleError);
+	  },
+	  getInitialState: function getInitialState() {
+	    return {
+	      email: "",
+	      password: "",
+	      error: false
+	    };
+	  },
+	  handleChange: function handleChange(e) {
+	    this.setState(e.target.name === "email" ? { email: e.target.value } : { password: e.target.value });
+	  },
+	  handleSubmit: function handleSubmit(e) {
+	    e.preventDefault();
+	    MainDispatcher.dispatch({
+	      action: MainConstant.USER.LOGIN,
+	      user: { email: this.state.email, password: this.state.password }
+	    });
+	  },
+	  handleError: function handleError() {
+	    this.setState({
+	      error: UserStore.getError().message
+	    });
+	  },
+	  render: function render() {
+	    return React.createElement(
+	      "div",
+	      null,
+	      React.createElement(
+	        "div",
+	        null,
+	        React.createElement(
+	          "div",
+	          null,
+	          React.createElement(
+	            "form",
+	            { onSubmit: this.handleSubmit },
+	            React.createElement(
+	              "div",
+	              null,
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "span",
+	                  { prefix: true },
+	                  React.createElement("i", null)
+	                )
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement("input", { type: "text", placeholder: "email", name: "email", onChange: this.handleChange })
+	              )
+	            ),
+	            React.createElement(
+	              "div",
+	              null,
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "span",
+	                  { prefix: true },
+	                  React.createElement("i", null)
+	                )
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement("input", { type: "password", placeholder: "password", name: "password", onChange: this.handleChange })
+	              ),
+	              React.createElement(
+	                "div",
+	                null,
+	                React.createElement(
+	                  "button",
+	                  { type: "submit" },
+	                  "Login"
+	                ),
+	                React.createElement(
+	                  "p",
+	                  null,
+	                  "Don't have an account? ",
+	                  React.createElement(
+	                    "a",
+	                    { href: "/register" },
+	                    "Rigister here"
+	                  )
+	                )
+	              )
+	            )
+	          ),
+	          this.state.error ? React.createElement(
+	            "div",
+	            null,
+	            this.state.error
+	          ) : ""
+	        )
+	      )
+	    );
+	  }
+	});
+
+	module.exports = Login;
 
 /***/ }
 /******/ ]);
