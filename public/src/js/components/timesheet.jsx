@@ -5,8 +5,12 @@ var React = require("react");
 var Timesheet = React.createClass({
 	render: function(){
 		return (
-			<div>
-				<h1>Contractor Timesheet page!</h1>
+			<div className="timesheetEntery">
+				<table>
+					<tr>
+						<td>hey</td>
+					</tr>
+				</table>
 			</div>	
 		)
 	}

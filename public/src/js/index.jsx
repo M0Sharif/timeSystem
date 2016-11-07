@@ -14,7 +14,7 @@ var Timesheet = require("./components/timesheet.jsx");
 // var Edit = require("./components/body/edit.jsx");
 // var Create = require("./components/body/create.jsx");
 
-// require('../scss/style.scss');
+require('../scss/style.scss');
 
 function authentication(nextState, replace) {
   if (!localStorage.getItem("token")) {
@@ -34,7 +34,7 @@ var App = React.createClass({
 
   		  <Route path="/" component={Main} onEnter={authentication}>
   			   <IndexRoute component={Timesheet}/>
-           
+
   		  </Route>
 	     </Router>
     )

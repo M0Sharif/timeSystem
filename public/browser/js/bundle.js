@@ -62,7 +62,7 @@
 	// var Edit = require("./components/body/edit.jsx");
 	// var Create = require("./components/body/create.jsx");
 
-	// require('../scss/style.scss');
+	__webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"../scss/style.scss\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 
 	function authentication(nextState, replace) {
 	  if (!localStorage.getItem("token")) {
@@ -29032,11 +29032,19 @@
 		render: function render() {
 			return React.createElement(
 				"div",
-				null,
+				{ className: "timesheetEntery" },
 				React.createElement(
-					"h1",
+					"table",
 					null,
-					"Contractor Timesheet page!"
+					React.createElement(
+						"tr",
+						null,
+						React.createElement(
+							"td",
+							null,
+							"hey"
+						)
+					)
 				)
 			);
 		}
