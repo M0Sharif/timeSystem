@@ -1,7 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     authenticationController = require('./controllers/authentication');
-    // contractor = require('../controllers/spartan'),
+    timesheet = require('./controllers/timesheet'),
     // invoiceAdmin = require('../controllers/client');
 
 // AUTH ROUTES -----------------------------------------------------------------
@@ -19,11 +19,11 @@ router.route("/register")
 // PROFILES ROUTES -------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-
-// SPARTAN ROUTES ------------------------------------------------------------
-// To display all spartans
-// router.route("/spartan")
-// 	.get(spartan.index);
+// TIMESHEET ROUTES ------------------------------------------------------------
+// To display all timesheets
+router.route("/timesheet")
+	.get(timesheet.index)
+	.put(timesheet.create);
 
 // router.route("/spartan/:id")
 // 	.get(spartan.show)

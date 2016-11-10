@@ -4,7 +4,18 @@ var User = require('../../models/user'),
     merge = require('merge');
 
 function register(req, res) {
-  User.create(merge(req.body), function(err, user) {
+  User.create(merge(req.body, {
+    weekStart:    "",
+    weekEnd:      "",
+    day: [{
+      date:       "",
+      timeIn:     "",
+      timeOut:    "",
+      lunchTime:  ""
+    }],
+    approved:     false,
+    invoiced:     false
+  }), function(err, user) {
     if (err) return res.status(401).send({error: err});
     if (!user) return res.status(500).send({error: 'Database error, is it connected?'});
 

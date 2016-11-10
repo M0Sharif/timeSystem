@@ -6,15 +6,19 @@ var userSchema = mongoose.Schema({
   firstName:    { type: String },
   lastName:     { type: String },
   email:        { type: String, required: true, unique: true },
-  passwordHash: { type: String }
-  // profile:      {
-  //   image: 		{ type: String },
-  //   summary: 		{ type: String, default: "" },
-  //   experience: [String],
-  //   skills: 		[String],
-  //   projects: 	[String],
-  //   interests: 	[String]
-  // }
+  passwordHash: { type: String },
+  timesheet:    {
+    weekStart:  {type: String},
+    weekEnd:    {type: String},
+    day: [{
+      date:        { type: String },
+      timeIn:      { type: String },
+      timeOut:     { type: String },
+      lunchTime:   { type: String }
+    }],
+    approved:    { type: String },
+    invoiced:    { type: String }
+  }
 });
 
 // Instance method to validate password
@@ -50,18 +54,6 @@ userSchema.path("passwordHash").validate(function(){
     }
   }
 });
-
-// userSchema.path("available").validate(function(available){
-//   if (this.type !== "spartan"){
-//     this.invalidate("available", "cannot add available for " + this.type);
-//   }
-// });
-
-// userSchema.path("course").validate(function(course){
-//   if (this.type !== "spartan" && this.course.length > 0){
-//     this.invalidate("course", "cannot add course for " + this.type);
-//   }
-// });
 
 userSchema.path("email").validate(function(email) {
   if (!validator.isEmail(email)) {

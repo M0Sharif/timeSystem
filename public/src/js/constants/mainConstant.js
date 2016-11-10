@@ -16,18 +16,15 @@ module.exports = {
     },
     DELETE: "USER DELETE"
   },
-  DASHBOARD: {
-    CLIENT: "DASHBOARD CLIENT",
-    SPARTAN: "DASHBOARD SPARTANS",
-    ADMIN: "DASHBOARD ADMIN",
-    UPDATE: "DASHBOARD UPDATE",
-    TYPE: {
-      SPARTAN: "spartan",
-      CLIENT: "client",
-      ADMIN: "admin"
+  TIMESHEET: {
+    UPDATE: "TIMESHEET UPDATE",
+    GET: "TIMESHEET GET",
+    CREATE: "TIMESHEET CREATE",
+    ERROR: {
+      UPDATE: "TIMESHEET ERROR UPDATE",
+      DELETE: "TIMESHEET ERROR DELETE",
     },
-    SEARCH: {
-      NAME: "DASHBOARD SEARCH NAME"
-    }
+      EDIT: "PROFILE EDIT",
+      DELETE: "PROFILE DELETE"
   }
 }
